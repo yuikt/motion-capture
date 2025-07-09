@@ -36,7 +36,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
         writer.writerow([fname, count])
 
 #==============================================
-    # Pose detection and landmark extraction
+# Pose detection and landmark extraction
 #==============================================
 class poseDetector():
     def __init__(self, mode=False, model =1, smooth = True, detection = 0.5, tracking = 0.5):
@@ -67,33 +67,33 @@ class poseDetector():
         return(img)
 
     def getPosition(self,img, draw=True):
-        lmList = []
+        lmlist = []
         if self.results.pose_landmarks:
             for id, lm in enumerate(self.results.pose_landmarks.landmark): #it sends whole 33 landmarks
-                 h, w, c = img.shape # shape of img and color
-                 cx, cy = int(lm.x*w), int(lm.y*h) #convert landmark to original image size
-                 lmList.append([cx,cy])
-                 lm_array = np.asarray(lmList)
+                h, w, c = img.shape # shape of img and color
+                cx, cy = int(lm.x*w), int(lm.y*h) #convert landmark to original image size (pixel positions)
+                lmlist.append([cx,cy])
+                lm_array = np.asarray(lmlist)
 
-                 # Initialize the x and y sums to zero
-                 sum_x, sum_y = 0, 0
+                # Initialize the x and y sums to zero
+                sum_x, sum_y = 0, 0
 
-                 # Loop over each coordinate and add its x and y values to the sums
-                 for coord in lm_array:
-                     sum_x += coord[0]
-                     sum_y += coord[1]
+                # Loop over each coordinate and add its x and y values to the sums
+                for coord in lm_array:
+                    sum_x += coord[0]
+                    sum_y += coord[1]
 
-                 # Calculate the centroid by dividing the sums by the number of coordinates
-                 num_coords = len(lm_array)
-                 centroid_x = sum_x / num_coords
-                 centroid_y = sum_y / num_coords
+                # Calculate the centroid by dividing the sums by the number of coordinates
+                num_coords = len(lm_array)
+                centroid_x = sum_x / num_coords
+                centroid_y = sum_y / num_coords
 
-        # Return the centroid as a tuple of (x, y) values
-        return centroid_x, centroid_y
+        # Return the centroid as a tuple of (x, y) values, and list of landmarks
+        return centroid_x, centroid_y, lmlist
 
 
 #===================================
-    # Run code
+# Main Processing
 #===================================
 
 def main():
@@ -101,12 +101,12 @@ def main():
     for f in all_files:
         filename = os.path.splitext(f)[0]
         file_path = os.path.join(data_path, f)
-        cap = cv2.VideoCapture(file_path) 
+        cap = cv2.VideoCapture(file_path) # Open video
         detector = poseDetector()
         frame_number = frame_counts.get(f)
 
-        # Create an empty aray for collecting centroid x,y from 33 landmarks
-        data = np.zeros((frame_number, 2))
+        # Create an empty aray for collecting centroid x,y from 33 landmarks and all 33 landmarks
+        data = np.zeros((frame_number, 68))
 
         i = 0
         pTime = time.time()  # Initialize it
@@ -117,18 +117,24 @@ def main():
                 print("End of video or cannot read frame.")
                 break
 
-            i+=1
+            # Read frame 
+            i += 1
             print(i)
 
-            print(np.shape(img))
             img = detector.findPose(img)
-            centroid_x, centroid_y = detector.getPosition(img) # lmlist is array shape (33,2)
+            centroid_x, centroid_y, lm = detector.getPosition(img) # lmlist is array shape (33,2)
+            # print('centroid x =', centroid_x)
+            # print('centroid y =', centroid_y)
 
             if centroid_x is None or centroid_y is None:
                 centroid_x, centroid_y = np.nan, np.nan
+                lm = [[np.nan, np.nan] for _ in range(33)]
 
-            data[i-1] = centroid_x, centroid_y
+            # Flatten landmarks to a list: [x0, y0, x1, y1, ...]
+            lm_flat = [coord for point in lm for coord in point] #
+            data[i-1] = np.concatenate(([centroid_x, centroid_y], lm_flat))
 
+            # Show fps and centroid
             cTime = time.time()
             fps = 1 / (cTime - pTime)
             pTime = cTime
@@ -136,17 +142,38 @@ def main():
                         (255, 0, 0), 5)  # show frame rate
 
             # Display the image with the circle
-            cv2.circle(img, (round(centroid_x), round(centroid_y)), 10, (255, 0, 255), -1) # pink circle for centroid
+            cv2.circle(img, (round(centroid_x), round(centroid_y)), 5, (255, 0, 255), -1) # pink circle for centroid
             
             # Resize img to show in the window:
-            img_resized = cv2.resize(img, (800, 600))
+            img_resized = cv2.resize(img, (1024, 768))
+
             cv2.imshow("Image", img_resized)
             cv2.waitKey(1)  # wait duration for next frame
-            cv2.destroyAllWindows()
 
+            # Data stored each frame: frame_number, centroid_x, centroid_y, lm_0_x, lm_0_y, lm_1_x, lm_1_y, ..., lm_32_x, lm_32_y
             if i >= frame_number:
-                np.savetxt(os.path.join(output_path, f"{filename}.csv"), data, fmt='%.2f', delimiter=',')  
+
+                # Build header names
+                header = ["centroid_x", "centroid_y"]
+                for i in range(1,34):
+                    header.extend([f"x{i}", f"y{i}"])
+                header_str = ",".join(header) # Join into comma-separated string
+
+                # save to csv
+                np.savetxt(
+                    os.path.join(output_path, f"{filename}_ct_lm.csv"),
+                    data,
+                    fmt="%.2f",
+                    delimiter=",",
+                    header=header_str,
+                    comments=""  # remove the default '#' at the start of the header line
+                )
+
                 break
+        
+        cap.release()
+        cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()
