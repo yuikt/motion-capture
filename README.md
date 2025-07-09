@@ -6,7 +6,7 @@ Run `motion_capture_landmark.py` to detect 33 landmarks and calculate their cent
   * centroid_x and centroid_y of each video frame are stored in folder `Motion_centroids`
 
 < NOTE > \
-The original video files used in this project are from the paper:
+The original video files (folder `WISDM`) used in this project are from the paper:
 
 **Actions as Space-Time Shapes**  
 Lena Gorelick, Moshe Blank, Eli Shechtman, Michal Irani, and Ronen Basri
