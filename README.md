@@ -1,9 +1,8 @@
 # Motion_capture
 
 ## Pose detection and landmark extraction
-Run `motion_capture_landmark.py` to detect 33 landmarks and calculate their centroids of each video
-  * list of 33 landmarks are stored in folder `Motion_landmarks`
-  * centroid_x and centroid_y of each video frame are stored in folder `Motion_centroids`
+Run `motion_capture_landmarks.py` to detect 33 landmarks and calculate their centroids of each video
+  * centroid_x, centroid_y, andlist of 33 landmarks of each video frame are stored in folder `Motion_centroids_landmarks`
 
 < NOTE > \
 The original video files (folder `WISDM`) used in this project are from the paper:
