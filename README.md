@@ -17,3 +17,13 @@ If you use these videos or this dataset, please consider citing the original pub
 
 ## Analysis 
 Run `motion_capture_analysis.ipy` for analyzing gait pattern or joint angle estimation
+
+This project analyzes human motion data (e.g., joint angles, symmetry, and smoothness) extracted using Mediapipe. 
+
+
+## Features
+
+- Joint angle tracking (elbows, knees, shoulders)
+- Symmetry analysis of left-right body parts
+- Smoothness and jerk score evaluation
+- Basic mesh and trajectory visualizations
