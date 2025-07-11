@@ -62,8 +62,13 @@ class poseDetector():
 
         if self.results.pose_landmarks: #if True
             if draw:
-                self.mpDraw.draw_landmarks(img, self.results.pose_landmarks, self.mpPose.POSE_CONNECTIONS) #draw landmarks on img
-
+                self.mpDraw.draw_landmarks(
+                    img, 
+                    self.results.pose_landmarks, 
+                    self.mpPose.POSE_CONNECTIONS,
+                    landmark_drawing_spec=self.mpDraw.DrawingSpec(color=((255, 0, 0)), thickness=2, circle_radius=1),
+                    connection_drawing_spec=self.mpDraw.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
+                    ) #draw landmarks on img
         return(img)
 
     def getPosition(self,img, draw=True):
