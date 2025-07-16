@@ -16,7 +16,7 @@ If you use these videos or this dataset, please consider citing the original pub
 
 
 ## Motion Analysis Using Pose Landmarks
-   * Run `main.py` to analyze human motion from 2D pose landmark data. It performs tasks such as calculating joint angles, evaluating posture symmetry, and measuring movement smoothness through jerk analysis.
+   * Run `main_analysis.py` to analyze human motion from 2D pose landmark data. It performs tasks such as calculating joint angles, evaluating posture symmetry, and measuring movement smoothness through jerk analysis.
 
-   * Run `motion_capture_analysis.ipy` for analyzing gait pattern or joint angle estimation
+   * Run `motion_smoothness_measure.ipy` for analyzing jerk-based measure
 
